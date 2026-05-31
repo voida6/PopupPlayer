@@ -1,7 +1,7 @@
 # Generates PopupPlayer's toolbar icons at the four sizes Chrome uses.
-# Draws a Picture-in-Picture glyph: an outer frame with a small "popup" window
-# in the bottom-right corner and a play triangle inside it, on a rounded
-# indigo gradient tile. Re-run after tweaking to regenerate the PNGs:
+# Draws a Material-style picture-in-picture glyph (outer frame + a small popup
+# window in the bottom-right corner with a play-triangle cut-out) in deep purple
+# on a transparent background. Re-run after tweaking to regenerate the PNGs:
 #   powershell -NoProfile -ExecutionPolicy Bypass -File generate-icons.ps1
 
 Add-Type -AssemblyName System.Drawing
@@ -25,56 +25,52 @@ function New-Icon([int]$S, [string]$file) {
     $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
     $g.Clear([System.Drawing.Color]::Transparent)
 
-    # Material 3 tonal palette: a pastel tile with a deeper tone of the same hue.
-    $bgPath = New-RoundedRect 0 0 $S $S ($S * 0.22)
-    $tile = [System.Drawing.Color]::FromArgb(255, 230, 222, 255)  # pastel lavender
-    $ink = [System.Drawing.Color]::FromArgb(255, 103, 80, 164)    # Material 3 primary
-    $fill = New-Object System.Drawing.SolidBrush($tile)
-    $g.FillPath($fill, $bgPath)
+    # Deep purple glyph (Material 3 primary tone) on a transparent background.
+    $ink = [System.Drawing.Color]::FromArgb(255, 103, 80, 164)
 
-    # Outer frame (the "screen"): rounded outline in the deep tone.
-    $c = $S * 0.18
+    # Outer frame (the "screen"): rounded outline.
+    $c = $S * 0.16
     $fw = $S - 2 * $c
     $fh = $S - 2 * $c
-    $penW = [Math]::Max(1.0, $S * 0.075)
+    $penW = [Math]::Max(1.0, $S * 0.085)
     $pen = New-Object System.Drawing.Pen($ink, $penW)
     $pen.LineJoin = [System.Drawing.Drawing2D.LineJoin]::Round
-    $framePath = New-RoundedRect $c $c $fw $fh ($S * 0.13)
+    $framePath = New-RoundedRect $c $c $fw $fh ($S * 0.16)
     $g.DrawPath($pen, $framePath)
 
-    # Popup window: filled white rounded rect overlapping the bottom-right corner.
-    $pw = $fw * 0.54
-    $ph = $fh * 0.48
-    $px = $S - $c - $pw + ($penW * 0.5)
-    $py = $S - $c - $ph + ($penW * 0.5)
-    # Tile-colored pad behind the popup so it reads as sitting on top of the frame.
-    $gapBrush = New-Object System.Drawing.SolidBrush($tile)
-    $gi = $penW * 0.9
-    $gapPath = New-RoundedRect ($px - $gi) ($py - $gi) ($pw + 2 * $gi) ($ph + 2 * $gi) ($S * 0.11)
-    $g.FillPath($gapBrush, $gapPath)
-    $popPath = New-RoundedRect $px $py $pw $ph ($S * 0.08)
-    $popBrush = New-Object System.Drawing.SolidBrush($ink)
-    $g.FillPath($popBrush, $popPath)
+    # Popup window: filled rounded rect tucked inside the bottom-right corner,
+    # clear of the frame stroke (Material picture_in_picture_alt style).
+    $m = $penW * 0.9                      # margin from the inner edge of the frame
+    $pw = $fw * 0.46
+    $ph = $fh * 0.42
+    $px = $c + $fw - $penW / 2 - $m - $pw
+    $py = $c + $fh - $penW / 2 - $m - $ph
+    $popPath = New-RoundedRect $px $py $pw $ph ($S * 0.07)
 
-    # Play triangle inside the popup (indigo, cut-out look). Only when big enough.
+    # Play triangle as a transparent cut-out via even-odd fill (anti-aliased).
     if ($S -ge 32) {
         $cx = $px + $pw / 2
         $cy = $py + $ph / 2
-        $t = $ph * 0.30
-        $pts = @(
+        $t = $ph * 0.28
+        $tri = New-Object System.Drawing.Drawing2D.GraphicsPath
+        $tri.AddPolygon(@(
             (New-Object System.Drawing.PointF(($cx - $t * 0.55), ($cy - $t))),
             (New-Object System.Drawing.PointF(($cx - $t * 0.55), ($cy + $t))),
             (New-Object System.Drawing.PointF(($cx + $t * 0.85), $cy))
-        )
-        $triBrush = New-Object System.Drawing.SolidBrush($tile)
-        $g.FillPolygon($triBrush, $pts)
-        $triBrush.Dispose()
+        ))
+        $popPath.AddPath($tri, $false)
+        $popPath.FillMode = [System.Drawing.Drawing2D.FillMode]::Alternate
+        $tri.Dispose()
     }
+
+    $popBrush = New-Object System.Drawing.SolidBrush($ink)
+    $g.FillPath($popBrush, $popPath)
 
     $path = Join-Path $outDir $file
     $bmp.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
 
-    $pen.Dispose(); $gapBrush.Dispose(); $fill.Dispose(); $popBrush.Dispose()
+    $pen.Dispose(); $popBrush.Dispose()
+    $framePath.Dispose(); $popPath.Dispose()
     $g.Dispose(); $bmp.Dispose()
     Write-Host "wrote $file ($S x $S)"
 }
