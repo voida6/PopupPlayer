@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "PopupPlayer",
+  "version": "0.1.0",
+  "description": "Pop the active video into a floating Picture-in-Picture window, with play/pause and 10s skip controls.",
+  "action": {
+    "default_title": "Pop out video (PopupPlayer)"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["activeTab", "scripting"]
+}
