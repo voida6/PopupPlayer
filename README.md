@@ -6,8 +6,9 @@ click — on any site that has an HTML5 `<video>`.
 
 ## What it does
 
-- **Works on any site with a video.** Click the toolbar icon once to pop the
-  active video into a floating window, click again to close it.
+- **Works on any site with a video.** Click the toolbar icon (or press
+  **Alt+T**) once to pop the active video into a floating window; do it again to
+  close it. The shortcut can be changed at `chrome://extensions/shortcuts`.
 - **Forces PiP even where sites disable it.** Some streaming services hide or
   disable the built-in PiP button (Netflix, for example). PopupPlayer requests
   Picture-in-Picture programmatically so it still pops out. This only relocates
@@ -23,11 +24,12 @@ click — on any site that has an HTML5 `<video>`.
 ## How it works
 
 - `manifest.json` — MV3 manifest. No host permissions; just `activeTab` +
-  `scripting`, granted for the current tab when you click the toolbar button.
-- `background.js` — on toolbar click, injects a self-contained `togglePip`
-  function into the active tab. It picks the best `<video>` (a playing one if
-  available, otherwise the largest), wires up the Media Session controls, and
-  requests Picture-in-Picture.
+  `scripting`, granted for the current tab when you invoke the extension. The
+  `commands` entry binds the Alt+T shortcut to the action.
+- `background.js` — when the action fires (toolbar click or Alt+T), injects a
+  self-contained `togglePip` function into the active tab. It picks the best
+  `<video>` (a playing one if available, otherwise the largest), wires up the
+  Media Session controls, and requests Picture-in-Picture.
 
 ## Install (load unpacked)
 
@@ -40,5 +42,4 @@ click — on any site that has an HTML5 `<video>`.
 
 - Optional [Document Picture-in-Picture](https://developer.chrome.com/docs/web-platform/document-picture-in-picture)
   mode for a fully custom control bar (Chrome 116+).
-- A keyboard shortcut to toggle without the toolbar.
 - Smarter `<video>` selection on pages that embed several.
