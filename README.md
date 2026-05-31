@@ -38,7 +38,6 @@ click — on any site that has an HTML5 `<video>`.
 
 ## Planned / next
 
-- Custom toolbar icons under `icons/`.
 - Optional [Document Picture-in-Picture](https://developer.chrome.com/docs/web-platform/document-picture-in-picture)
   mode for a fully custom control bar (Chrome 116+).
 - A keyboard shortcut to toggle without the toolbar.
