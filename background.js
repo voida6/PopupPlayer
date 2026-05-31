@@ -25,9 +25,9 @@ function togglePip() {
     return r.width * r.height;
   };
 
-  const videos = Array.from(document.querySelectorAll("video")).filter(
-    (v) => !v.disablePictureInPicture
-  );
+  // Include videos that the site marked disablePictureInPicture (e.g. Netflix);
+  // we re-enable it on the chosen video below before requesting PiP.
+  const videos = Array.from(document.querySelectorAll("video"));
   if (videos.length === 0) {
     console.warn("PopupPlayer: no video found on this page");
     return;
@@ -61,6 +61,9 @@ function togglePip() {
       video.currentTime = Math.min(end, video.currentTime + step);
     });
   }
+
+  // Some sites set this to suppress PiP; clear it before requesting.
+  video.disablePictureInPicture = false;
 
   video.requestPictureInPicture().catch((err) =>
     console.warn("PopupPlayer: requestPictureInPicture failed", err)
