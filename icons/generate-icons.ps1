@@ -25,22 +25,19 @@ function New-Icon([int]$S, [string]$file) {
     $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
     $g.Clear([System.Drawing.Color]::Transparent)
 
-    # Rounded gradient background tile.
-    $bgRect = New-Object System.Drawing.RectangleF(0, 0, $S, $S)
+    # Material 3 tonal palette: a pastel tile with a deeper tone of the same hue.
     $bgPath = New-RoundedRect 0 0 $S $S ($S * 0.22)
-    $c1 = [System.Drawing.Color]::FromArgb(255, 99, 102, 241)   # indigo-500
-    $c2 = [System.Drawing.Color]::FromArgb(255, 67, 56, 202)    # indigo-700
-    $grad = New-Object System.Drawing.Drawing2D.LinearGradientBrush($bgRect, $c1, $c2, 45.0)
-    $g.FillPath($grad, $bgPath)
+    $tile = [System.Drawing.Color]::FromArgb(255, 230, 222, 255)  # pastel lavender
+    $ink = [System.Drawing.Color]::FromArgb(255, 103, 80, 164)    # Material 3 primary
+    $fill = New-Object System.Drawing.SolidBrush($tile)
+    $g.FillPath($fill, $bgPath)
 
-    $white = [System.Drawing.Color]::White
-
-    # Outer frame (the "screen"): white rounded outline.
+    # Outer frame (the "screen"): rounded outline in the deep tone.
     $c = $S * 0.18
     $fw = $S - 2 * $c
     $fh = $S - 2 * $c
     $penW = [Math]::Max(1.0, $S * 0.075)
-    $pen = New-Object System.Drawing.Pen($white, $penW)
+    $pen = New-Object System.Drawing.Pen($ink, $penW)
     $pen.LineJoin = [System.Drawing.Drawing2D.LineJoin]::Round
     $framePath = New-RoundedRect $c $c $fw $fh ($S * 0.13)
     $g.DrawPath($pen, $framePath)
@@ -50,14 +47,14 @@ function New-Icon([int]$S, [string]$file) {
     $ph = $fh * 0.48
     $px = $S - $c - $pw + ($penW * 0.5)
     $py = $S - $c - $ph + ($penW * 0.5)
-    # Backing pad behind the popup so it reads as sitting on top of the frame.
-    $gapBrush = New-Object System.Drawing.SolidBrush($c2)
+    # Tile-colored pad behind the popup so it reads as sitting on top of the frame.
+    $gapBrush = New-Object System.Drawing.SolidBrush($tile)
     $gi = $penW * 0.9
     $gapPath = New-RoundedRect ($px - $gi) ($py - $gi) ($pw + 2 * $gi) ($ph + 2 * $gi) ($S * 0.11)
     $g.FillPath($gapBrush, $gapPath)
     $popPath = New-RoundedRect $px $py $pw $ph ($S * 0.08)
-    $whiteBrush = New-Object System.Drawing.SolidBrush($white)
-    $g.FillPath($whiteBrush, $popPath)
+    $popBrush = New-Object System.Drawing.SolidBrush($ink)
+    $g.FillPath($popBrush, $popPath)
 
     # Play triangle inside the popup (indigo, cut-out look). Only when big enough.
     if ($S -ge 32) {
@@ -69,7 +66,7 @@ function New-Icon([int]$S, [string]$file) {
             (New-Object System.Drawing.PointF(($cx - $t * 0.55), ($cy + $t))),
             (New-Object System.Drawing.PointF(($cx + $t * 0.85), $cy))
         )
-        $triBrush = New-Object System.Drawing.SolidBrush($c2)
+        $triBrush = New-Object System.Drawing.SolidBrush($tile)
         $g.FillPolygon($triBrush, $pts)
         $triBrush.Dispose()
     }
@@ -77,7 +74,7 @@ function New-Icon([int]$S, [string]$file) {
     $path = Join-Path $outDir $file
     $bmp.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
 
-    $pen.Dispose(); $gapBrush.Dispose(); $grad.Dispose(); $whiteBrush.Dispose()
+    $pen.Dispose(); $gapBrush.Dispose(); $fill.Dispose(); $popBrush.Dispose()
     $g.Dispose(); $bmp.Dispose()
     Write-Host "wrote $file ($S x $S)"
 }
