@@ -38,30 +38,6 @@ function togglePip() {
   const pool = playing.length ? playing : videos;
   const video = pool.sort((a, b) => area(b) - area(a))[0];
 
-  // Surface controls in the PiP window via the Media Session API. Chrome renders
-  // a button for each registered action handler.
-  const ms = navigator.mediaSession;
-  if (ms) {
-    const set = (action, handler) => {
-      try {
-        ms.setActionHandler(action, handler);
-      } catch (err) {
-        /* some actions are unsupported on some browsers */
-      }
-    };
-    set("play", () => video.play());
-    set("pause", () => video.pause());
-    set("seekbackward", (details) => {
-      const step = (details && details.seekOffset) || 10;
-      video.currentTime = Math.max(0, video.currentTime - step);
-    });
-    set("seekforward", (details) => {
-      const step = (details && details.seekOffset) || 10;
-      const end = isFinite(video.duration) ? video.duration : Infinity;
-      video.currentTime = Math.min(end, video.currentTime + step);
-    });
-  }
-
   // Some sites set this to suppress PiP; clear it before requesting.
   video.disablePictureInPicture = false;
 

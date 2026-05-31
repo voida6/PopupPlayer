@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "PopupPlayer",
   "version": "0.1.0",
-  "description": "Pop the active video into a floating Picture-in-Picture window, with play/pause and 10s skip controls.",
+  "description": "Pop the active video into the browser's native Picture-in-Picture window with one click or Alt+T.",
   "action": {
     "default_title": "Pop out video (PopupPlayer)",
     "default_icon": {
